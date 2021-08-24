@@ -1,0 +1,103 @@
+<html>
+<head>
+    Mock up CBS Web UI
+<style>
+    .label-width{
+        width: 200px;
+        display:inline-block
+    }
+    .input-box-margin{
+        margin-left: 50px;
+    }
+</style>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+<script type="text/javascript">
+    var app = angular.module('myApp', []);
+    app.controller('MainCtrl', ['$scope', '$http', '$window', function ($scope, $http, $window) {
+        $scope.cbsBrokerLogon = 'TRNroot';
+        $scope.cbsClientId = 'cbsClientId11';
+        $scope.cbsToken = 'cbsToken11';
+        $scope.cbsCompany = 'cbsCompany11';
+        $scope.cbsClientNum = 'cbsClientNum11';
+        $scope.timeStamp = new Date().toISOString();
+        $scope.env = "DEV";
+        $scope.errorText = "";
+
+        $scope.submitForm = function () {
+            console.log("I am clicked")
+
+            var url = 'https://' + $scope.env + '-elink.api.au.npd.bizcover.io/api/BrokerAuthentication/broker-access';
+
+            if($scope.env === 'local'){
+                url = 'https://localhost:44342/api/BrokerAuthentication/broker-access'
+            }
+            var req = {
+                method: 'POST',
+                url: url,
+                headers: {
+                    'Content-Type': "application/json",
+                },
+                data: {
+                    cbsBrokerLogon: $scope.cbsBrokerLogon,
+                    cbsClientId: $scope.cbsClientId,
+                    cbsToken: $scope.cbsToken,
+                    cbsCompany: $scope.cbsCompany,
+                    cbsClientNum: $scope.cbsClientNum,
+                    timeStamp: $scope.timeStamp
+                }
+            }
+            $http(req)
+                .then(function (response) {
+                    console.log(response);
+                    $window.location.href = response.data.brokerAccessUrl;
+                }, function (error) {
+                        var errorText = error.data;
+                        if(error.data.message != null){
+                            errorText = error.data.message;
+                        }
+                    $scope.errorText = errorText + ' STATUS-CODE = ' + error.status;
+                    console.log(error);
+                });
+        };
+        console.log("I am loaded")
+    }]);
+
+    angular.element(document).ready(function () {
+        angular.bootstrap(document, ['myApp']);
+    });
+</script>
+
+<body>
+    <div ng-controller="MainCtrl">
+        <h1>CBS Form</h1>
+        <p style="color: red;">{{errorText}}</p>
+        <div>          
+            </br>
+            <label class ="label-width">CBSBrokerLogon</label>
+            <input class="input-box-margin" type="text" ng-model="cbsBrokerLogon" name="cbsBrokerLogon" />
+                    <br />
+            <label class ="label-width">CBSClientId</label>
+            <input class="input-box-margin" type="text" ng-model="cbsClientId" name="cbsClientId"  />
+                    <br />
+            <label class ="label-width">CBSToken</label>
+            <input class="input-box-margin" type="text" ng-model="cbsToken" name="cbsToken" />
+                    <br />
+            <label class ="label-width">CBSCompany</label>
+            <input class="input-box-margin" type="text" ng-model="cbsCompany" name="cbsCompany" />
+                    <br />
+            <label class="label-width">CBSClientNum</label>
+            <input class="input-box-margin" type="text" ng-model="cbsClientNum" name="cbsClientNum" />
+                <br />
+            <label class="label-width">CBSTimeStamp</label>
+            <input class="input-box-margin" type="text" ng-model="timeStamp" name="timeStamp" />
+                    <br />
+            <label class ="label-width">Elink ENV: (DEV/UAT/SIT)</label> 
+            <input class="input-box-margin" type="text" ng-model="env" name="env" />
+                <br />
+            <input type="submit" id="submit" value="Submit" ng-click="submitForm()" />
+        </div> 
+    </div>
+</body>
+
+</html>
